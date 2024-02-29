@@ -16,21 +16,24 @@ export function useLoadList () {
 
 
 export function useLoadListByPageNumber (page) {
-    const boardList = useMemo(() => {
-        const isBoardList = localStorage.getItem("boardList")
-        return !isBoardList ? [] : JSON.parse(isBoardList);
-    },[page]);
-
     const pageNumber = parseInt(page);
 
-    const size = boardList.length;
+    const loadBoardList = useMemo(() => {
+        const lsBoardList = localStorage.getItem("boardList")
+        const loadBoardList = !lsBoardList ? [] : JSON.parse(lsBoardList);
+        return loadBoardList;
+    },[page]);
 
-    const totalPageCount = size % 10 === 0 ? size / 10 : (size / 10) + 1;
+    const boardList = loadBoardList.filter((board, index) => index > (pageNumber * 10) - 11 && index < pageNumber*10 );
+
+    const size = loadBoardList.length;
+
+    const totalPageCount = Math.floor(size % 10 === 0 ? size / 10 : (size / 10) + 1);
     const startPageNumber = pageNumber % 5 === 0 ? pageNumber - 4 : (pageNumber - (pageNumber % 5)) + 1
     const endPageNumber = startPageNumber + 4 <= totalPageCount ? startPageNumber + 4 : totalPageCount;
 
     let pageNumbers = useMemo(() => {
-        
+
         let newPageNumbers = [];
         for(let i = startPageNumber; i <= endPageNumber; i++){
             newPageNumbers = [...newPageNumbers, i];
@@ -39,5 +42,5 @@ export function useLoadListByPageNumber (page) {
 
     }, [startPageNumber]);
 
-        return { boardList, size, pageNumbers, totalPageCount };
+        return { boardList, size, pageNumbers, totalPageCount, endPageNumber, startPageNumber };
 }
